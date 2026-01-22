@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Meteor Sprint (Simple)</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0b1020;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border: 2px solid rgba(255,255,255,0.4);
+      background: #111827;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🚀 Meteor Sprint</h1>
+<p>Move: A / D or ← →</p>
+
+<canvas id="game" width="800" height="500"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let player = { x: 370, y: 450, w: 60, h: 20, speed: 7 };
+let meteors = [];
+let score = 0;
+let gameOver = false;
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft" || e.key === "a") player.x -= player.speed;
+  if (e.key === "ArrowRight" || e.key === "d") player.x += player.speed;
+});
+
+function spawnMeteor() {
+  meteors.push({
+    x: Math.random() * 760,
+    y: -20,
+    r: 15 + Math.random() * 15,
+    speed: 3 + Math.random() * 3
+  });
+}
+
+function update() {
+  if (gameOver) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Player
+  ctx.fillStyle = "#22c55e";
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+
+  // Meteors
+  ctx.fillStyle = "#ef4444";
+  meteors.forEach(m => {
+    m.y += m.speed;
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Collision
+    if (
+      m.x > player.x &&
+      m.x < player.x + player.w &&
+      m.y + m.r > player.y
+    ) {
+      gameOver = true;
+    }
+  });
+
+  // Remove offscreen
+  meteors = meteors.filter(m => m.y < 520);
+
+  // Score
+  score++;
+  ctx.fillStyle = "white";
+  ctx.font = "20px Arial";
+  ctx.fillText("Score: " + score, 20, 30);
+
+  if (gameOver) {
+    ctx.font = "40px Arial";
+    ctx.fillText("GAME OVER", 280, 250);
+  }
+
+  requestAnimationFrame(update);
+}
+
+// Meteor spawn loop
+setInterval(spawnMeteor, 700);
+
+// Start game
+update();
+</script>
+
+</body>
+</html>
